@@ -3,10 +3,27 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserSchema } from './schemas/user.schemas';
+import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { GenerateToken } from './jwt.strategy';
 
 @Module({
-  imports: [MongooseModule.forFeature([{name : 'User', schema : UserSchema}])],
+  imports: [
+    PassportModule.register({defaultStrategy : 'jwt'}),
+    JwtModule.registerAsync({
+      inject: [ConfigService],
+      useFactory: (config : ConfigService) => {
+        return {
+          secret: config.get<string>('JWT_SECRET'),
+          signOptions: { expiresIn: config.get<string | number>('JWT_EXPIRES_IN') },
+        };
+      }
+    }),
+    MongooseModule.forFeature([{name : 'User', schema : UserSchema}])
+  ],
   controllers: [AuthController],
-  providers: [AuthService]
+  providers: [AuthService, GenerateToken],
+  exports : [PassportModule, GenerateToken]
 })
 export class AuthModule {}
