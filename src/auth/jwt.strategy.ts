@@ -6,30 +6,25 @@ import { User } from "./schemas/user.schemas";
 import { Model } from "mongoose";
 
 @Injectable()
-export class GenerateToken extends PassportStrategy(Strategy) {
+export class JwtStrategy extends PassportStrategy(Strategy) {
     constructor(
-        @InjectModel(User.name)
-        private userModel: Model<User>
+        @InjectModel(User.name) private userModel: Model<User>
     ) {
         super({
             jwtFromRequest: ExtractJwt.fromHeader('token'),
-            secretOrKey: process.env.JWT_SECRET,
-        });
+            secretOrKey : process.env.JWT_SECRET,
+        })
     }
     
-    async validate(payload:any){
+    async validate(payload) {
+        const {id} = payload
 
-        try {
-            const {id} = payload;
-            const user = await this.userModel.findById(id);
+        const user = await this.userModel.findById(id);
 
-            if(!user){
-                throw new UnauthorizedException('Login first to access this route');
-            }
-            return user
-
-        } catch (error) {
-            return error.message
+        if(!user) {
+            throw new UnauthorizedException('Login first to access this route');
         }
+
+        return user;
     }
 }
