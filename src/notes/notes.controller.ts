@@ -1,13 +1,17 @@
-import { Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { NotesService } from './notes.service';
+import { NotesDto } from './dto/notes.dto';
 
 @Controller('notes')
 @UseGuards(AuthGuard())
 export class NotesController {
-    constructor() {}
+    constructor(
+        private notesServise: NotesService
+    ) {}
 
     @Post('/create')
-    CreaetNote() {
-        return 'Note created';
+    CreaetNote(@Body() note: NotesDto, @Req() req) {
+        return this.notesServise.createNote(note, req.user);
     }
 }
