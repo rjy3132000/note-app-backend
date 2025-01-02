@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { NotesService } from './notes.service';
 import { NotesDto } from './dto/notes.dto';
@@ -23,5 +23,15 @@ export class NotesController {
     @Get('/:id')
     GetNoteById(@Param('id') id:string) {
         return this.notesServise.getNoteById(id);
+    }
+
+    @Put('/:id')
+    UpdateNoteById(@Param('id') id:string, @Body() note: NotesDto) {
+        return this.notesServise.updateNoteById(id, note);
+    }
+
+    @Delete('/:id')
+    DeleteNoteById(@Param('id') id:string) {
+        return this.notesServise.deleteNoteById(id);
     }
 }

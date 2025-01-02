@@ -6,46 +6,67 @@ import { User } from 'src/auth/schemas/user.schemas';
 
 @Injectable()
 export class NotesService {
-    constructor(
-        @InjectModel(Notes.name)
-        private noteModel: mongoose.Model<Notes>
-    ) {}
+  constructor(
+    @InjectModel(Notes.name)
+    private noteModel: mongoose.Model<Notes>,
+  ) {}
 
-    async createNote(note: Notes, user: User) {
-        try {
-            const newNoteData = new this.noteModel({
-                ...note,
-                user: user._id
-            });
-            const newNote = await newNoteData.save();
-            return newNote;
-        } catch (error) {
-            return error;
-        }
+  async createNote(note: Notes, user: User) {
+    try {
+      const newNoteData = new this.noteModel({
+        ...note,
+        user: user._id,
+      });
+      const newNote = await newNoteData.save();
+      return newNote;
+    } catch (error) {
+      return error;
+    }
+  }
+
+  async getAllNotes() {
+    try {
+      const allNotes = await this.noteModel.find();
+      return allNotes;
+    } catch (error) {
+      return error;
+    }
+  }
+
+  async getNoteById(id: string) {
+    try {
+      const note = await this.noteModel.findById(id);
+
+      if (!note) {
+        return HttpStatus.NOT_FOUND;
+      }
+
+      return note;
+    } catch (error) {
+      return error;
+    }
+  }
+
+  async updateNoteById(id: string, updateNote: Notes) {
+    const note = await this.noteModel.findById(id);
+
+    if (!note) {
+      return HttpStatus.NOT_FOUND;
     }
 
-    async getAllNotes() {
-        try {
-            const allNotes = await this.noteModel.find();
-            return allNotes;
-        } catch (error) {
-            return error;
-        }
+    return await this.noteModel.findByIdAndUpdate(id, updateNote, {
+        new: true,
+        runValidators: true,
+    })
+  }
+
+  async deleteNoteById(id: string) {
+    const note = await this.noteModel.findById(id);
+
+    if (!note) {
+      return HttpStatus.NOT_FOUND;
     }
 
-    async getNoteById(id: string) {
-        try {
-            
-            const note = await this.noteModel.findById(id);           
-
-            if (!note) {
-                return HttpStatus.NOT_FOUND;
-            }
-
-            return note;
-
-        } catch (error) {
-            return error;
-        }
-    }
+    return await this.noteModel.findByIdAndDelete(id);
+  }
 }
